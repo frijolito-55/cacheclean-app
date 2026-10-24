@@ -1,0 +1,14 @@
+# Ignorar compilaciones y dependencias
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+.pub-cache/
+.pub/
+
+# Ignorar archivos del sistema y claves
+*.lock
+.DS_Store
+*.keystore
+*.jks
