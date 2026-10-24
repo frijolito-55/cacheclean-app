@@ -27,27 +27,24 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Recreate clean Android project structure
+      - name: Setup Full Native Flutter Project
         run: |
-          mkdir -p /tmp/fresh
-          cd /tmp/fresh
-          flutter create --platforms=android --org=com.cacheclean fresh_app
-          cp -r fresh_app/android $GITHUB_WORKSPACE/
-          cd $GITHUB_WORKSPACE
-
-      - name: Resolve dependencies
-        run: flutter pub get
-
-      - name: Build Android APK
-        run: flutter build apk --debug --verbose
+          mkdir -p /tmp/build_workspace
+          cd /tmp/build_workspace
+          flutter create --org com.cacheclean cacheclean
+          cp -r $GITHUB_WORKSPACE/lib/* cacheclean/lib/
+          cp $GITHUB_WORKSPACE/pubspec.yaml cacheclean/pubspec.yaml
+          cd cacheclean
+          flutter pub get
+          flutter build apk --debug
+          mkdir -p $GITHUB_WORKSPACE/apk_output
+          cp build/app/outputs/flutter-apk/*.apk $GITHUB_WORKSPACE/apk_output/
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: CacheClean-app-debug
-          path: build/app/outputs/flutter-apk/*.apk
-          if-no-files-found: warn
+          path: apk_output/*.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -56,6 +53,6 @@ jobs:
           tag_name: v1.0.0
           name: "CacheClean v1.0.0 (APK Instalable)"
           body: "Descarga directa del APK de CacheClean para Android."
-          files: build/app/outputs/flutter-apk/*.apk
+          files: apk_output/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
